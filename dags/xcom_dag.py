@@ -1,8 +1,10 @@
+from datetime import datetime
+from random import uniform
+
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from random import uniform
-from datetime import datetime
+
 
 default_args = {
     'start_date': datetime(2020, 1, 1)

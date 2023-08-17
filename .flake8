@@ -1,6 +1,6 @@
 [flake8]
 application_import_names = utils
-exclude = sample_tracking, venv
+exclude = sample_tracking, .venv
 ignore =
     # N812: lowercase imported as non lowercase
     N812

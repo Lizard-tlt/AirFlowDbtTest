@@ -1,9 +1,9 @@
-from airflow import DAG
-
 from datetime import datetime
 
-from dbt_task_generator import DbtTaskGroup
+from airflow import DAG
 from airflow.operators.empty import EmptyOperator
+
+from dbt_task_generator import DbtTaskGroup
 
 
 def get_manifest() -> dict:

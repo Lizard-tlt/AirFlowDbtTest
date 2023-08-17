@@ -1,6 +1,6 @@
+import inspect
 from copy import copy
 from typing import Any, Dict, List, Optional
-import inspect
 # from os import sep
 
 from airflow.models import BaseOperator
