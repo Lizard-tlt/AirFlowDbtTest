@@ -44,13 +44,16 @@ class DbtNode:
 
 class DbtTaskGenerator:
     def __init__(
-        self, dag: DAG, manifest: dict, path_model_filter: str = None
+        self,
+        manifest: dict,
+        task_group: TaskGroup = None,
+        path_model_filter: str = None
     ) -> None:
-        self.dag: DAG = dag
+        self.__task_group = task_group
         self.path_model_filter = path_model_filter
         self.manifest = manifest
         self.persisted_node_map: Dict[str, DbtNode] = self._get_persisted_parent_to_child_map()
-        self.task_group = TaskGroup(dag=dag, group_id="dbt_group", tooltip="")
+        self._add_all_tasks()
 
     def path_filter(self, path: str) -> bool:
         if not self.path_model_filter:
@@ -98,7 +101,7 @@ class DbtTaskGenerator:
 
         return persisted_children
 
-    def add_all_tasks(self) -> TaskGroup:
+    def _add_all_tasks(self) -> None:
         nodes_to_add: Dict[str, DbtNode] = {}
         for node in self.persisted_node_map:
             included_node = copy(self.persisted_node_map[node])
@@ -109,7 +112,6 @@ class DbtTaskGenerator:
             nodes_to_add[node] = included_node
 
         self._add_tasks(nodes_to_add)
-        return self.task_group
 
     def _add_tasks(self, nodes_to_add: Dict[str, DbtNode]) -> None:
         dbt_model_tasks = self._create_dbt_run_model_tasks(nodes_to_add)
@@ -132,7 +134,7 @@ class DbtTaskGenerator:
         # return DummyOperator(dag=self.dag, task_id=model_name, run_date='')
         bash_command = f"dbt run --select {node.path}"
         return BashOperator(dag=self.dag,
-                            task_group=self.task_group,
+                            task_group=self.__task_group,
                             task_id=node.name,
                             bash_command=f"echo {bash_command}")
 
@@ -143,3 +145,20 @@ class DbtTaskGenerator:
             if child:
                 dbt_model_tasks[parent_node.full_name] >> child
                 # print(f"{dbt_model_tasks[parent_node.full_name].bash_command} --> {child.task_id}")
+
+
+class DbtTaskGroup(TaskGroup, DbtTaskGenerator):
+    """
+    Render a dbt project as an Airflow Task Group.
+    """
+
+    def __init__(
+        self,
+        group_id: str = "dbt_task_group",
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        kwargs["group_id"] = group_id
+        TaskGroup.__init__(self, *args, **airflow_kwargs(**kwargs))
+        kwargs["task_group"] = self
+        DbtTaskGenerator.__init__(self, *args, **specific_kwargs(**kwargs))
