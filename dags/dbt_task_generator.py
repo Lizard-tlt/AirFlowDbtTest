@@ -1,14 +1,11 @@
 from copy import copy
-from logging import Logger
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+import inspect
 # from os import sep
 
-from airflow import DAG
-from airflow.models import Variable, BaseOperator
+from airflow.models import BaseOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.empty import EmptyOperator as DummyOperator
 from airflow.utils.task_group import TaskGroup
-import inspect
 
 
 sep = "\\"
