@@ -1,0 +1,8 @@
+dbt_x:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      schema: db1
+      host: 172.30.0.3
+      port: 8123
